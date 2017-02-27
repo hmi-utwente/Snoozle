@@ -19,7 +19,7 @@ var useXBee = true;
 if (process.argv.length > 2) {
     serialPortName = process.argv[2];
 } if (process.argv.length > 3) {
-    if (proccess.argv[3] == 'xbee') {
+    if (process.argv[3] == 'xbee') {
         useXBee = true;
     } else if (process.argv[3] == 'serial') {
         useXBee = false;
