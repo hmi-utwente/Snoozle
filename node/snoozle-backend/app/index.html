@@ -55,6 +55,7 @@
 			  -->
 		
 		<div ng-repeat="block in dialogJson.blocks">
+			<button ng-if="dialogEditMode" class='pure-button editAdd addBlock' ng-click="dialogJson.blocks.splice($index, 0, { name: 'New Block', columns: [] })">Add Block Here</button>
 			<h3 class="dialogBlock">
 				<span ng-if="!dialogEditMode">{{block.name}}</span>
 				<input ng-if="dialogEditMode" class="editField editBlockName" type="text" ng-model="block.name">
@@ -76,21 +77,22 @@
 							<input ng-if="dialogEditMode" class="editField editUtteranceText" type="text" ng-model="utt.label">
                             <textarea ng-if="dialogEditMode" class="editField bmlArea" ng-model="utt.text"></textarea>
 							<button ng-if="dialogEditMode" class='pure-button editDel afterUtterance' ng-click="column.utterances.splice($index,1)">x</button>
-							<button ng-if="dialogEditMode" class='pure-button editAdd afterUtterance' ng-click="column.utterances.splice($index+1, 0, {id: randomID(), text: 'New Utterance'})">+</button>
+                        <button ng-if="dialogEditMode" class='pure-button editAdd afterUtterance' ng-click="column.utterances.splice($index+1, 0, {id: randomID(), text: defaultBml, label: 'Name' })">+</button>
+
 						</div>
 						
-						<button ng-if="dialogEditMode && column.utterances.length < 1" class='pure-button editAdd addUtterance editAddEnd' ng-click="column.utterances.push({id:randomID(), text: 'New Utterance'})">+</button>
+						<button ng-if="dialogEditMode && column.utterances.length < 1" class='pure-button editAdd addUtterance editAddEnd' ng-click="column.utterances.push({id:randomID(), text: defaultBml, label: 'Name' })">+</button>
 					</div>
 				</div>
 			</div>
 			
-			<button ng-if="dialogEditMode" class='pure-button editAdd addBlock' ng-click="dialogJson.blocks.splice($index+1, 0, { name: 'New Block', columns: [] })">Add Block Here</button>
 		</div>
 		
-		<button ng-if="dialogEditMode && dialogJson.blocks.length < 1" class='pure-button editAdd addBlock' ng-click="dialogJson.blocks.splice($index+1, 0, { name: 'New Block', columns: [] })">Add Block Here</button>
+		<button ng-if="dialogEditMode" class='pure-button editAdd addBlock' ng-click="dialogJson.blocks.splice(dialogJson.blocks.length, 0, { name: 'New Block', columns: [] })">Add Block Here</button>
 		
 	  
 	  
+	    <!--
         <div ng-if="!dialogEditMode" class='pure-g'>
           <div class='pure-u-1-1'>
             <div class='wrap'>
@@ -103,6 +105,7 @@
             </div>
           </div>
         </div>
+        -->
 		
 		
       </div>
