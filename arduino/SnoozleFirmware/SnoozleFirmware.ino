@@ -65,7 +65,7 @@ void loop() {
       if (_servo <= nServos && _servo > 0) {
         servoTargetVals[_servo-1] = _val;
         servoStepDelays[_servo-1] = _spd;
-        servoStepSizes[_servo-1] = _stp
+        servoStepSizes[_servo-1] = _stp;
         nextServoUpdate[_servo-1] = now + _spd;
       }
       headerRead = false; offset = 0;
