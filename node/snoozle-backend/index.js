@@ -1,3 +1,8 @@
+var fs = require('fs');
+var engine = require('engine.io');
+var express = require('express')
+var serveStatic = require('serve-static')
+var open = require('open');
 var util = require('util');
 var events = require('events');
 var Stomp = require('stomp-client');
@@ -79,31 +84,38 @@ xbh.Connect().catch(function(err) {
 
 middleware.connect(function(sessionId) {
     middleware.subscribe(readTopic, function(body, headers) {
-        console.log(body);
         var obj = JSON.parse(body);
         if (obj['msgType'] && obj.msgType == 'setServo') {
             var _defaultSetServoMsg = {
-                servo: 1,
+                servo: [1, 2, 3, 4],
                 position: 90,
                 stepDelay: 5,
                 stepSize: 1
             } // Apply defaults to message:
             obj = Object.assign(_defaultSetServoMsg, obj);
-            // Make sure we don't pass properties bigger than a single byte:
-            var ser = parseInt(obj.servo,10) & 255;
-            var pos = parseInt(obj.position,10) & 255;
-            var std = parseInt(obj.stepDelay,10) & 255;
-            var sts = parseInt(obj.stepSize,10) & 255;
-            var packet = [ 0x00, 0x00, 0x00, ser, pos, std, sts ];
-            if (useXBee) {// Turn into a xbee-api frame...
-                packet = xbeeAPI.buildFrame({
-                    type: C.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
-                    destination64: remoteXBeeAddr,
-                    data: packet
-                });
+            console.log(util.inspect(obj));
+
+            if (typeof(obj.servo) === 'number') {
+                obj.servo = [obj.servo];
             }
-            console.log(util.inspect(packet));
-            xbh.serialport.write(packet);
+
+			for (var s = 0; s < obj.servo.length; s++) {
+                // Make sure we don't pass properties bigger than a single byte:
+                var ser = parseInt(obj.servo[s],10) & 255;
+                var pos = parseInt(obj.position,10) & 255;
+                var std = parseInt(obj.stepDelay,10) & 255;
+                var sts = parseInt(obj.stepSize,10) & 255;
+                var packet = [ 0x00, 0x00, 0x00, ser, pos, std, sts ];
+                if (useXBee) {// Turn into a xbee-api frame...
+                    packet = xbeeAPI.buildFrame({
+                        type: C.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
+                        destination64: remoteXBeeAddr,
+                        data: packet
+                    });
+                }
+                console.log(util.inspect(packet));
+                xbh.serialport.write(packet);
+            }
         }
     });
 
@@ -115,3 +127,75 @@ middleware.connect(function(sessionId) {
     console.log("Failed to connect to stomp: "+err);
 });
 
+
+
+var app = express();
+var http = require('http').createServer(app);
+var webPort = 5601;
+ 
+var dialogsFolder = "dialogs";
+var defaultDialogFile = "default.json";
+ 
+app.use(serveStatic(__dirname + '/app'));
+http.listen(webPort);
+
+var server = engine.attach(http);
+var sockets = [];
+function removeSocket(s) { sockets.splice(sockets.indexOf(s), 1); }
+function broadcast(msg) {
+    var data = JSON.stringify(msg);
+    sockets.forEach(function(s) {
+        s.send(data);
+    });
+}
+ 
+server.on('connection', function(socket) {
+    sockets.push(socket);
+    socket.on('message', function(msg) {
+        var parsed = JSON.parse(msg);
+		console.log(util.inspect(parsed));
+        if (parsed.type == "refresh") {
+          var res = {
+            type:"refresh",
+			data: {}
+          }
+          socket.send(JSON.stringify(res));
+        } else if (parsed.type == "save_dialog") {
+			fs.renameSync("./"+dialogsFolder+"/"+defaultDialogFile, "./"+dialogsFolder+"/"+defaultDialogFile+".backup_"+(new Date().getTime()));
+			fs.writeFile("./"+dialogsFolder+"/"+defaultDialogFile, JSON.stringify(parsed.data), function(err) {
+				if(err) {
+				  broadcast({
+					type:"res",
+					data: 'e Dialog could not be saved ('+err+')'
+				  });
+				} else {
+				  broadcast({
+					type:"res",
+					data: 'l Dialog saved.'
+				  });
+				}
+			}); 
+			
+			var csvOut = "name|text";
+			var blocks = parsed.data.blocks;
+			for (var b = 0; b < blocks.length; b++) {
+				for (var c = 0; c < blocks[b].columns.length; c++) {
+					for (var u = 0; u < blocks[b].columns[c].utterances.length; u++) {
+						var utterance = blocks[b].columns[c].utterances[u];
+						csvOut = csvOut+"\n"+utterance.id+"|"+utterance.text;
+					}
+				}
+			}
+		} else if (parsed.type == "load_dialog") {
+		  var res = {
+            type:"dialog",
+            dialog: JSON.parse(fs.readFileSync("./"+dialogsFolder+"/"+defaultDialogFile, 'utf8'))
+          }
+          socket.send(JSON.stringify(res));
+		}
+    });
+	
+    socket.on('close', function() {
+        removeSocket(socket);
+    });
+});

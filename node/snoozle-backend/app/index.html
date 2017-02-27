@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="remoteControlApp">
+    <head>
+      <meta charset="utf-8">
+      <title>VA Remote Client</title>
+      <link rel="stylesheet" href="/base-min.css">
+      <link rel="stylesheet" href="/pure-min.css">
+      <link rel="stylesheet" href="/grids-responsive-min.css">
+      <link rel="stylesheet" href="/style.css">
+
+      <script src="/engine.io.js"></script>
+      <script src="/jquery.min.js"></script>
+      <script src="/angular.min.js"></script>
+      <script src="/bower_components/angular-audio/app/angular.audio.js"></script>
+      <script src="/scrollglue.js"></script>
+      <script src="/controller.js"></script>
+<!--     	<script src="/stomp.js"></script>-->
+ <script src="/webstomp.min.js"></script>
+    </head>
+    <body>
+      <div id="main" class='pure-form' ng-controller="RemoteCTRL">
+	  
+		<nav class="fixed-nav-bar">
+			<h3>Experiment Control</h3>
+			<div class='pure-g'>
+			  <div class='pure-u-1-1'>
+				<div class='wrap'>
+				  <button class="pure-button file red" ng-click="resetPillow()">Reset</button>
+				  
+				  <div style="float:right;" ng-if="!experimentRunning" >
+					  <button class="pure-button yellow" ng-class="{ 'edit' : dialogEditMode }" ng-click="toggleEditMode()">
+						<span ng-if="!dialogEditMode">Edit Dialog</span>
+						<span ng-if="dialogEditMode">Stop Editing</span>
+					  </button>
+					  <button ng-if="!dialogEditMode" class="pure-button yellow" ng-click="saveDialog()">Save Dialog</button>
+					  <button ng-if="!dialogEditMode" class="pure-button yellow" ng-click="loadDialog()">Load Dialog</button>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		</nav>
+		
+			<!--
+        <h3 ng-if="!experimentRunning" >Menu</h3>
+        <div ng-if="!experimentRunning" class='pure-g' id="top">
+          <div class='pure-u-1-1'>
+            <div class='wrap'>
+              <b>Distance:</b> <input type="text" class="valueRefresh distance" ng-model="l_distance">
+			  <br />
+              <input type="text" class='cmd' ng-model="cmddata">
+              <button class="pure-button" ng-click="sendCmd()">CMD</button>
+            </div>
+          </div>
+        </div>
+			  -->
+		
+		<div ng-repeat="block in dialogJson.blocks">
+			<h3 class="dialogBlock">
+				<span ng-if="!dialogEditMode">{{block.name}}</span>
+				<input ng-if="dialogEditMode" class="editField editBlockName" type="text" ng-model="block.name">
+				<button ng-if="dialogEditMode" class='pure-button editDel delBlock' ng-click="dialogJson.blocks.splice($index,1)">Delete whole Block</button>
+				<button ng-if="dialogEditMode" class='pure-button editAdd addColumn' ng-click="block.columns.push({ name: 'New Column', utterances: [] })">Add column to Block</button>
+			</h3>
+			<div class='pure-g'>
+				<div ng-repeat="column in block.columns" class='pure-u-1-{{block.columns.length}} buttonList'>
+					<div class='wrap'>
+						<h4>
+							<span ng-if="!dialogEditMode">{{column.name}}</span>
+							<input ng-if="dialogEditMode" class="editField editColumnName" type="text" ng-model="column.name">
+							<button ng-if="dialogEditMode" class='pure-button editDel delColumn' ng-click="block.columns.splice($index,1)">x</button>
+						</h4>
+						<div ng-repeat='utt in column.utterances'>
+							<button ng-if="!dialogEditMode" id='{{utt.id}}' class="pure-button" ng-click="pillowBML(utt.text)">
+								{{utt.label}}
+							</button>
+							<input ng-if="dialogEditMode" class="editField editUtteranceText" type="text" ng-model="utt.label">
+                            <textarea ng-if="dialogEditMode" class="editField bmlArea" ng-model="utt.text"></textarea>
+							<button ng-if="dialogEditMode" class='pure-button editDel afterUtterance' ng-click="column.utterances.splice($index,1)">x</button>
+							<button ng-if="dialogEditMode" class='pure-button editAdd afterUtterance' ng-click="column.utterances.splice($index+1, 0, {id: randomID(), text: 'New Utterance'})">+</button>
+						</div>
+						
+						<button ng-if="dialogEditMode && column.utterances.length < 1" class='pure-button editAdd addUtterance editAddEnd' ng-click="column.utterances.push({id:randomID(), text: 'New Utterance'})">+</button>
+					</div>
+				</div>
+			</div>
+			
+			<button ng-if="dialogEditMode" class='pure-button editAdd addBlock' ng-click="dialogJson.blocks.splice($index+1, 0, { name: 'New Block', columns: [] })">Add Block Here</button>
+		</div>
+		
+		<button ng-if="dialogEditMode && dialogJson.blocks.length < 1" class='pure-button editAdd addBlock' ng-click="dialogJson.blocks.splice($index+1, 0, { name: 'New Block', columns: [] })">Add Block Here</button>
+		
+	  
+	  
+        <div ng-if="!dialogEditMode" class='pure-g'>
+          <div class='pure-u-1-1'>
+            <div class='wrap'>
+              <div ng-class="{ 'glued' : glued }"><h4 ng-click="log = []">LOG</h4></div>
+              <div scroll-glue ng-model="glued" id='log'>
+                <ul>
+                  <li ng-repeat="item in log" class='{{item.class}}'>{{item.txt}}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+		
+		
+      </div>
+		
+    </body>
+</html>
