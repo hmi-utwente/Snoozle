@@ -20,9 +20,10 @@ int offset = 0;
 bool headerRead;
 
 int nServos = 4;
+bool flipServo[] = { true, true, false, false};
 int servoPins[] =          {  5, 6, 10, 11 };
-int servoTargetVals[] =    {  1,  1,  1, 1 };
-int servoVals[] =          {  0,  0,  0, 0 };
+int servoTargetVals[] =    {  179,  179,  1, 1 };
+int servoVals[] =          {  1,  1,  1, 1 };
 int servoStepDelays[] =    {  0,  0,  0, 0 };
 int servoStepSizes[] =     {  1,  1,  1, 1 };
 long nextServoUpdate[] =   {  0,  0,  0, 0 };
@@ -63,6 +64,8 @@ void loop() {
       Serial.println();
       */
       if (_servo <= nServos && _servo > 0) {
+        if (flipServo[_servo-1]) _val = 181-_val;
+        _val = constrain(_val, 1, 179);
         servoTargetVals[_servo-1] = _val;
         servoStepDelays[_servo-1] = _spd;
         servoStepSizes[_servo-1] = _stp;
