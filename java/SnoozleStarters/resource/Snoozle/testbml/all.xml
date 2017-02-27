@@ -1,4 +1,4 @@
-<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1">
+<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1">
 <mw:sendJsonMessage id="speech1" start="0">{
 "msgType": "setServo",
 "servo": 1,
@@ -6,4 +6,5 @@
 "stepDelay": 5,
 "stepSize": 1
 }</mw:sendJsonMessage>
+<bmlt:audiofile id="v1" fileName="Snoozle/audio/Excited/tidu-dududa.wav" start="0"/>
 </bml>
