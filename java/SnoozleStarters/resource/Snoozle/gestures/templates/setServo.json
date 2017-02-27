@@ -1,0 +1,7 @@
+{
+    "msgType": "setServo",
+    "servo": ${servo},
+    "position": ${position},
+    "stepDelay": ${stepDelay},
+    "stepSize": ${stepSize}
+}

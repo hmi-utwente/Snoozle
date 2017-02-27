@@ -1,0 +1,21 @@
+<configuration debug="true">
+	<appender name="STDOUT"
+    class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+     </pattern>
+    </encoder>
+  </appender>
+
+  <root level="WARN">
+    <appender-ref ref="STDOUT" />
+  </root>
+  
+  <logger name="nl.utwente" level="INFO"/>
+  <logger name="nl.utwente.hmi.middleware.loader" level="DEBUG"/>
+  <logger name="nl.utwente.hmi.middleware.stomp" level="INFO"/>
+  <logger name="twitter" level="INFO"/>
+  <logger name="KerstDM" level="DEBUG"/>
+  
+</configuration>

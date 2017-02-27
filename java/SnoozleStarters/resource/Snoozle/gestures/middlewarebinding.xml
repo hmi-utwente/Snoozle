@@ -1,0 +1,35 @@
+<middlewarebinding>
+    <!--
+    <MiddlewareUnitSpec type="???" namespace="http://hmi.ewi.utwente.nl/middlewareengine">
+        <constraints>
+        </constraints>
+        <parametermap>
+            <parameter src="filename" dst="filename"/>
+            <parameter src="resource" dst="resource"/>
+            <parameter src="servo" dst="servo"/>
+            <parameter src="position" dst="position"/>
+            <parameter src="stepDelay" dst="stepDelay"/>
+            <parameter src="stepSize" dst="stepSize"/>
+        </parametermap>
+        <parameterdefaults>
+            <parameterdefault name="filename" value="setServo.json"/>
+            <parameterdefault name="resource" value="clevr/gestures/templates"/>
+            <parameterdefault name="servo" value="1"/>
+            <parameterdefault name="position" value="90"/>
+            <parameterdefault name="stepDelay" value="5"/>
+            <parameterdefault name="stepSize" value="1"/>
+        </parameterdefaults>
+        <MiddlewareUnit type="SendJsonTemplateMessageMU"/>
+    </MiddlewareUnitSpec>
+    -->
+
+    <MiddlewareUnitSpec type="sendJsonMessage" namespace="http://hmi.ewi.utwente.nl/middlewareengine">
+        <constraints>
+        </constraints>
+        <parametermap>
+            <parameter src="content" dst="content"/>
+        </parametermap>
+        <MiddlewareUnit type="SendJsonDataMessageMU"/>
+    </MiddlewareUnitSpec>    
+    
+</middlewarebinding>

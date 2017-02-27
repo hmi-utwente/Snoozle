@@ -1,0 +1,48 @@
+<AsapVirtualHuman>
+	<Loader id="realizer" loader="asap.realizerembodiments.AsapRealizerEmbodiment">
+	  <BMLParser>
+	    <BMLAttributeExtension class="asap.bml.ext.bmla.BMLABMLBehaviorAttributes"/>      
+	  </BMLParser>
+	
+	  <BMLScheduler>
+	    <SchedulingHandler class="asap.realizer.scheduler.BMLASchedulingHandler" schedulingStrategy="asap.realizer.scheduler.SortedSmartBodySchedulingStrategy"/>
+	  </BMLScheduler>
+	  <PipeLoader id="pipe" loader="asap.middlewareadapters.loader.MiddlewareToBMLRealizerAdapterLoader">
+		  <MiddlewareOptions loaderclass="nl.utwente.hmi.middleware.stomp.STOMPMiddlewareLoader">
+            <MiddlewareProperty name="iTopic" value="/topic/ASAPSnoozleBmlRequest"/>
+            <MiddlewareProperty name="oTopic" value="/topic/ASAPSnoozleBmlFeedback"/>
+          </MiddlewareOptions>
+	  </PipeLoader>
+	</Loader>
+
+    <Loader id="middlewareembodiment" loader="asap.middlewareengine.embodiment.MiddlewareEmbodiment" requiredloaders="">
+        <MiddlewareOptions loaderclass="nl.utwente.hmi.middleware.stomp.STOMPMiddlewareLoader">
+            <MiddlewareProperty name="default" value="true"/>
+            <MiddlewareProperty name="iTopic" value="/topic/SnoozleFeedback"/>
+            <MiddlewareProperty name="oTopic" value="/topic/SnoozleRequests"/>
+        </MiddlewareOptions>
+    </Loader>
+      
+    <Loader id="middlewareengine" loader="asap.middlewareengine.engine.MiddlewareEngineLoader" requiredloaders="middlewareembodiment">
+        <MiddlewareBinding basedir="" resources="Snoozle/gestures" filename="middlewarebinding.xml"/>
+    </Loader>
+
+  	<Loader id="guiembodiment" loader="asap.realizerembodiments.JFrameEmbodiment">
+        <BmlUI demoscriptresources="Snoozle/testbml/"/>
+        <FeedbackUI/>
+    </Loader>
+
+   <Loader id="ttsbinding" loader="asap.marytts5binding.loader.MaryTTSBindingLoader">
+   </Loader>
+
+    <Loader id="speechengine" loader="asap.speechengine.loader.SpeechEngineLoader" requiredloaders="ttsbinding,guiembodiment">
+        <Voice factory="WAV_TTS" voicename="dfki-poppy"/>
+        <SpeechUI/>
+    </Loader>
+	
+    <Loader id="audioengine" loader="asap.audioengine.loader.AudioEngineLoader"/>
+   
+    <BMLRouting>
+        <Route behaviourclass="asap.middlewareengine.bml.SendMessageBehavior" engineid="middlewareengine"/>
+    </BMLRouting>
+</AsapVirtualHuman>
