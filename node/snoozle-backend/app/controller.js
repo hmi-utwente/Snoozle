@@ -89,7 +89,7 @@ function RemoteCTRL($scope, socket, stomp, ngAudio) {
     }
 	
 	$scope.pillowBML = function(text) {
-		var prefix = "<bml xmlns=\"http://www.bml-initiative.org/bml/bml-1.0\" id=\"servobml"+$scope.bmlId+"\" xmlns:bmlt=\"http://hmi.ewi.utwente.nl/bmlt\" xmlns:mw=\"http://hmi.ewi.utwente.nl/middlewareengine\">";
+		var prefix = "<bml  composition=\"REPLACE\" xmlns=\"http://www.bml-initiative.org/bml/bml-1.0\" id=\"servobml"+$scope.bmlId+"\" xmlns:bmlt=\"http://hmi.ewi.utwente.nl/bmlt\" xmlns:mw=\"http://hmi.ewi.utwente.nl/middlewareengine\">";
 		var suffix = "</bml>";
 		$scope.bmlId++;
         var msg = {

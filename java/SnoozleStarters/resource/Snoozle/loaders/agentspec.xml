@@ -27,17 +27,11 @@
         <MiddlewareBinding basedir="" resources="Snoozle/gestures" filename="middlewarebinding.xml"/>
     </Loader>
 
-  	<Loader id="guiembodiment" loader="asap.realizerembodiments.JFrameEmbodiment">
-        <BmlUI demoscriptresources="Snoozle/testbml/"/>
-        <FeedbackUI/>
-    </Loader>
-
    <Loader id="ttsbinding" loader="asap.marytts5binding.loader.MaryTTSBindingLoader">
    </Loader>
 
-    <Loader id="speechengine" loader="asap.speechengine.loader.SpeechEngineLoader" requiredloaders="ttsbinding,guiembodiment">
+    <Loader id="speechengine" loader="asap.speechengine.loader.SpeechEngineLoader" requiredloaders="ttsbinding">
         <Voice factory="WAV_TTS" voicename="dfki-poppy"/>
-        <SpeechUI/>
     </Loader>
 	
     <Loader id="audioengine" loader="asap.audioengine.loader.AudioEngineLoader"/>
