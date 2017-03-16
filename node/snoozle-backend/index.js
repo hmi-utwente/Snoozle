@@ -21,14 +21,22 @@ var serialPortName = 'COM1';
 var remoteXBeeAddr = "0013A20040628226";
 var useXBee = true;
 
+var baudrate = 57600;
+
 if (process.argv.length > 2) {
     serialPortName = process.argv[2];
-} if (process.argv.length > 3) {
+}
+
+if (process.argv.length > 3) {
     if (process.argv[3] == 'xbee') {
         useXBee = true;
     } else if (process.argv[3] == 'serial') {
         useXBee = false;
     }
+}
+
+if (process.argv.length > 4) {
+    baudrate = parseInt(process.argv[4]);
 }
 
 function XBeeSerialHandler(xb) {
@@ -54,7 +62,7 @@ XBeeSerialHandler.prototype.Connect = function () {
     return new Promise(function(fullfill, reject) {
         self.Close().then(function(res) {
             self.serialport = new SerialPort(serialPortName, {
-              baudrate: 57600,
+              baudrate: baudrate,
               parser: self.xbeeAPI.rawParser()
             });
 
