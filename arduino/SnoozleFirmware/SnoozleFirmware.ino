@@ -20,7 +20,11 @@ int offset = 0;
 bool headerRead;
 
 int nServos = 4;
+
+// flip servo: do they go from 0-180 or from 180-0...
 bool flipServo[] = { true, true, false, false};
+
+// what digital pins are we connected to
 int servoPins[] =          {  5, 6, 10, 11 };
 int servoTargetVals[] =    {  179,  179,  1, 1 };
 int servoVals[] =          {  1,  1,  1, 1 };
@@ -45,16 +49,19 @@ void loop() {
     if (offset > 15) offset = 0;
     buf[offset] = Serial.read();
     offset++;
-  
+
+    // When three zero bytes are read, we are in sync with the sender => headerRead
+    // The next four bytes are the values of a packet.
     if (offset > 2 && buf[offset-1] == 0 && buf[offset-2] == 0  && buf[offset-3] == 0) {
       headerRead = true; offset = 0;
     }
-  
+
+    // So, if headerRead, and 4 bytes after that were read, we have a packet.
     if (headerRead && offset == 4) {
-      int _servo = buf[0];
-      int _val = buf[1];
-      int _spd = buf[2];
-      int _stp = buf[3];
+      int _servo = buf[0];  // For this servo (0,1,2,3)
+      int _val = buf[1];   // set a new target position (0-180)
+      int _spd = buf[2];  // interpolate to that position from the current position, but wait &_spd ms between each step
+      int _stp = buf[3]; // step size
 
       /* Debug
       Serial.println();
