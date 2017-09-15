@@ -199,7 +199,6 @@ server.on('connection', function(socket) {
             type:"dialog",
             dialog: JSON.parse(fs.readFileSync("./"+dialogsFolder+"/"+defaultDialogFile, 'utf8'))
           }
-            console.log("Sent dialog");
           socket.send(JSON.stringify(res));
 		}
     });
