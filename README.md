@@ -2,8 +2,9 @@
 The software to control the Snoozle pillow, our submission to the HRI student design competition 2017.
 
 ## Installation
-Clone/download this repository, then put a copy of [hmibuild](https://github.com/ArticulatedSocialAgentsPlatform/hmibuild/archive/master.zip) in the `java` folder (rename it from `hmibuild-master` to `hmibuild` if necessary).
+Clone/download this repository, then put a copy of [hmibuild](https://github.com/ArticulatedSocialAgentsPlatform/hmibuild/archive/master.zip) next to the Snoozle folder (rename it from `hmibuild-master` to `hmibuild` if necessary).
 Requirements: jdk/jre (latest, 64bit), python (2.7.x), ant & node.js installed on your system.
+Also an Apollo MQ broker should be set up and running.
 It is usefull if ant & node are in your PATH.
 
 For ASAP got to `java/SnoozleStarters`:
