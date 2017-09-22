@@ -1,34 +1,49 @@
-#define trigPin1 13
+#define trigPin1 13 // Hand
 #define echoPin1 12
-#define trigPin2 9
-#define echoPin2 8
+#define trigPin2 11 // Pillar_1
+#define echoPin2 10
+#define trigPin3 9 // Pillar_2
+#define echoPin3 8
+
+unsigned long last_reading_send;
 
 void setup() {
   Serial.begin (9600);
-  pinMode(trigPin1, OUTPUT);
+  pinMode(trigPin1, OUTPUT); // Hand
   pinMode(echoPin1, INPUT);
-  pinMode(trigPin2, OUTPUT);
+  pinMode(trigPin2, OUTPUT); // Pillar_1
   pinMode(echoPin2, INPUT);
+  pinMode(trigPin3, OUTPUT); // Pillar_2
+  pinMode(echoPin3, INPUT);
+  last_reading_send = millis();
+}
+
+long readDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10); // Added this line
+  digitalWrite(trigPin, LOW);  // Added this line
+  long duration = pulseIn(echoPin, HIGH, 12000);
+  long distance = (duration / 2) / 29.1;
+  return distance;
 }
 
 void loop() {
-  long duration1, distance1, duration2, distance2;
-  
-  digitalWrite(trigPin1, HIGH);
-  delayMicroseconds(10); // Added this line
-  digitalWrite(trigPin1, LOW);  // Added this line
-  duration1 = pulseIn(echoPin1, HIGH, 12000);
-  distance1 = (duration1 / 2) / 29.1;
-  
-  digitalWrite(trigPin2, HIGH);
-  delayMicroseconds(10); // Added this line
-  digitalWrite(trigPin2, LOW);  // Added this line
-  duration2 = pulseIn(echoPin2, HIGH, 12000);
-  distance2 = (duration2 / 2) / 29.1;
+  long distance1, distance2, distance3;
 
-  Serial.print(distance1);
-  Serial.print("\t| ");
-  Serial.println(distance2);
-  
-  delay(5);
+  distance1 = readDistance(trigPin1, echoPin1);
+  distance2 = readDistance(trigPin2, echoPin2);
+  distance3 = readDistance(trigPin3, echoPin3);
+
+  if (millis() - last_reading_send >= 100 ) { // 1/10th second has passed
+    Serial.print("{ \"Hand\" : ");
+    Serial.print(distance1);
+    Serial.print(", \"Pillar_1\" : ");
+    Serial.print(distance2);
+    Serial.print(", \"Pillar_2\" : ");
+    Serial.print(distance3);
+    Serial.print("}\n");
+
+    last_reading_send = millis();
+  }
 }
+
