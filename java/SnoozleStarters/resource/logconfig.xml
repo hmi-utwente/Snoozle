@@ -8,14 +8,14 @@
     </encoder>
   </appender>
 
-  <root level="WARN">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
   
+  <logger name="snoozle" level="DEBUG"/>
   <logger name="nl.utwente" level="INFO"/>
+  <logger name="asap.realizer" level="INFO"/>
+  <logger name="nl.utwente.hmi.usb" level="DEBUG"/>
   <logger name="nl.utwente.hmi.middleware.loader" level="DEBUG"/>
-  <logger name="nl.utwente.hmi.middleware.stomp" level="INFO"/>
-  <logger name="twitter" level="INFO"/>
-  <logger name="KerstDM" level="DEBUG"/>
   
 </configuration>

@@ -15,6 +15,15 @@
  */
 #include <Servo.h>
 
+#define trigPin1 3 // Hand
+#define echoPin1 4
+#define trigPin2 8 // Pillar_1
+#define echoPin2 9
+#define trigPin3 12 // Pillar_2
+#define echoPin3 13
+
+unsigned long last_reading_send;
+
 byte buf[16];
 int offset = 0;
 bool headerRead;
@@ -35,12 +44,32 @@ long nextServoUpdate[] =   {  0,  0,  0, 0 };
 Servo servos[4];
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin (9600);
+  
+  pinMode(trigPin1, OUTPUT); // Hand
+  pinMode(echoPin1, INPUT);
+  pinMode(trigPin2, OUTPUT); // Pillar_1
+  pinMode(echoPin2, INPUT);
+  pinMode(trigPin3, OUTPUT); // Pillar_2
+  pinMode(echoPin3, INPUT);
+  last_reading_send = millis();
+  
   for(int i=0; i<nServos; i++) {
     servos[i].attach(servoPins[i]);
   }
   headerRead = false;
 }
+
+
+long readDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10); // Added this line
+  digitalWrite(trigPin, LOW);  // Added this line
+  long duration = pulseIn(echoPin, HIGH, 12000);
+  long distance = (duration / 2) / 29.1;
+  return distance;
+}
+
 
 void loop() {
   long now = millis();
@@ -63,13 +92,13 @@ void loop() {
       int _spd = buf[2];  // interpolate to that position from the current position, but wait &_spd ms between each step
       int _stp = buf[3]; // step size
 
-      /* Debug
+      /* Debug */
       Serial.println();
       Serial.print("Servo: "); Serial.print(_servo);
       Serial.print(" Val: "); Serial.print(_val);
       Serial.print(" Spd: "); Serial.print(_spd);
       Serial.println();
-      */
+      /**/
       if (_servo <= nServos && _servo > 0) {
         if (flipServo[_servo-1]) _val = 181-_val;
         _val = constrain(_val, 1, 179);
@@ -81,7 +110,8 @@ void loop() {
       headerRead = false; offset = 0;
     }
   }
-  
+
+  //do the controlling servo stuff
   for(int i=0; i<nServos; i++) {
     if (now >= nextServoUpdate[i]) {
       if (servoVals[i] > servoTargetVals[i]) {
@@ -96,5 +126,24 @@ void loop() {
       nextServoUpdate[i] = now + servoStepDelays[i];
       servos[i].write(servoVals[i]);
     }
+  }
+
+  //now do the sensing stuff :)
+  long distance1, distance2, distance3;
+
+  distance1 = readDistance(trigPin1, echoPin1);
+  distance2 = readDistance(trigPin2, echoPin2);
+  distance3 = readDistance(trigPin3, echoPin3);
+
+  if (millis() - last_reading_send >= 100 ) { // 1/10th second has passed
+    Serial.print("{ \"Hand\" : ");
+    Serial.print(distance1);
+    Serial.print(", \"Pillar_1\" : ");
+    Serial.print(distance2);
+    Serial.print(", \"Pillar_2\" : ");
+    Serial.print(distance3);
+    Serial.print("}\n");
+
+    last_reading_send = millis();
   }
 }

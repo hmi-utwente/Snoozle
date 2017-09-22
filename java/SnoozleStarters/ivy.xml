@@ -4,10 +4,10 @@
       <include file="${ivy.settings.dir}/configurations.xml"/>
    </configurations>
    <dependencies>
-     <dependency org="HMI"   name="HmiFlipper"     rev="latest.${resolve.status}"   /> 
-     <dependency org="HMI"   name="HmiFlipperMiddlewareExtension"     rev="latest.${resolve.status}"   />    
-     <dependency org="HMI"   name="HmiMiddlewareAbstractionLayer"     rev="latest.${resolve.status}"   />    
-     <dependency org="Asap"   name="AsapMiddlewareEngine"     rev="latest.${resolve.status}"   />     <dependency org="Asap"   name="AsapMiddlewareRealizerAdapters"     rev="latest.${resolve.status}"   />    
+     <dependency org="HMI"   name="HmiUSBCommunication"     rev="latest.${resolve.status}"   />    
+     <dependency org="HMI"   name="HmiMiddlewareAbstractionLayer"     rev="latest.${resolve.status}"   />  
+     <dependency org="Asap"   name="AsapMiddlewareEngine"     rev="latest.${resolve.status}"   />     
+     <dependency org="Asap"   name="AsapMiddlewareRealizerAdapters"     rev="latest.${resolve.status}"   />    
      
       <dependency org="HMI"   name="HmiJComponentEnvironment"     rev="latest.${resolve.status}"   />    
 
