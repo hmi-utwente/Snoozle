@@ -61,16 +61,6 @@ void setup() {
 }
 
 
-long readDistance(int trigPin, int echoPin) {
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10); // Added this line
-  digitalWrite(trigPin, LOW);  // Added this line
-  long duration = pulseIn(echoPin, HIGH, 12000);
-  long distance = (duration / 2) / 29.1;
-  return distance;
-}
-
-
 void loop() {
   long now = millis();
 
@@ -129,13 +119,14 @@ void loop() {
   }
 
   //now do the sensing stuff :)
-  long distance1, distance2, distance3;
-
-  distance1 = readDistance(trigPin1, echoPin1);
-  distance2 = readDistance(trigPin2, echoPin2);
-  distance3 = readDistance(trigPin3, echoPin3);
-
   if (millis() - last_reading_send >= 100 ) { // 1/10th second has passed
+    
+    long distance1, distance2, distance3;
+  
+    distance1 = readDistance(trigPin1, echoPin1);
+    distance2 = readDistance(trigPin2, echoPin2);
+    distance3 = readDistance(trigPin3, echoPin3);
+
     Serial.print("{ \"Hand\" : ");
     Serial.print(distance1);
     Serial.print(", \"Pillar_1\" : ");
@@ -147,3 +138,14 @@ void loop() {
     last_reading_send = millis();
   }
 }
+
+
+long readDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10); // Added this line
+  digitalWrite(trigPin, LOW);  // Added this line
+  long duration = pulseIn(echoPin, HIGH, 12000);
+  long distance = (duration / 2) / 29.1;
+  return distance;
+}
+
