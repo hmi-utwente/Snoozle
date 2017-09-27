@@ -14,7 +14,6 @@
       <dependency org="HMI"   name="HmiEnvironmentBase"     rev="latest.${resolve.status}"   />    
       <dependency org="HMI"   name="HmiAudioEnvironment"     rev="latest.${resolve.status}"   />   
 
-      <dependency org="HMI"   name="HmiTestUtil"        transitive="false" rev="latest.${resolve.status}"   />
       <dependency org="HMI"   name="HmiUtil"            transitive="false" rev="latest.${resolve.status}"   />
       <dependency org="HMI"   name="HmiXml"             transitive="false" rev="latest.${resolve.status}"   />
 
@@ -28,7 +27,6 @@
       
       <dependency org="slf4j"     name="slf4j-api"               rev="latest.release"  />   
       <dependency org="jcip"    name="jcip-annotations"      rev="latest.release"  />
-      <dependency org="junit"     name="junit-dep"        rev="latest.release"  /> 
 	  <dependency org="logback"  name="logback-classic"    rev="latest.release"  />   
       <dependency org="logback"  name="logback-core"       rev="latest.release"  />   
       <dependency org="google"   name="guava"                rev="latest.${resolve.status}"  />

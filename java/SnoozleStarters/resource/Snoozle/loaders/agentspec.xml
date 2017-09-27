@@ -18,20 +18,13 @@
     <Loader id="middlewareembodiment" loader="asap.middlewareengine.embodiment.MiddlewareEmbodiment" requiredloaders="">
         <MiddlewareOptions loaderclass="nl.utwente.hmi.middleware.stomp.STOMPMiddlewareLoader">
             <MiddlewareProperty name="default" value="true"/>
-            <MiddlewareProperty name="iTopic" value="/topic/SnoozleFeedback"/>
-            <MiddlewareProperty name="oTopic" value="/topic/SnoozleRequests"/>
+            <MiddlewareProperty name="iTopic" value="/topic/dummyin"/>
+            <MiddlewareProperty name="oTopic" value="/topic/SnoozleCommands"/>
         </MiddlewareOptions>
     </Loader>
       
     <Loader id="middlewareengine" loader="asap.middlewareengine.engine.MiddlewareEngineLoader" requiredloaders="middlewareembodiment">
         <MiddlewareBinding basedir="" resources="Snoozle/gestures" filename="middlewarebinding.xml"/>
-    </Loader>
-
-   <Loader id="ttsbinding" loader="asap.marytts5binding.loader.MaryTTSBindingLoader">
-   </Loader>
-
-    <Loader id="speechengine" loader="asap.speechengine.loader.SpeechEngineLoader" requiredloaders="ttsbinding">
-        <Voice factory="WAV_TTS" voicename="dfki-poppy"/>
     </Loader>
 	
     <Loader id="audioengine" loader="asap.audioengine.loader.AudioEngineLoader"/>

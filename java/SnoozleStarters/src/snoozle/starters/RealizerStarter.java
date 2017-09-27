@@ -42,9 +42,7 @@ public class RealizerStarter
 		clock.addClockListener(ee);
 
         System.out.println("loading spec "+spec);
-        AsapVirtualHuman zeno = ee.loadVirtualHuman("", spec, "AsapRealizer - Snoozle");
-        //zeno.getRealizerPort().performBML("<bml xmlns=\"http://www.bml-initiative.org/bml/bml-1.0\"  id=\"bml1\" xmlns:bmlt=\"http://hmi.ewi.utwente.nl/bmlt\"></bml>");
-
+        AsapVirtualHuman snoozle = ee.loadVirtualHuman("", spec, "AsapRealizer - Snoozle");
     }
 
 
