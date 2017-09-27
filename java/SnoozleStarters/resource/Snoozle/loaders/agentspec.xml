@@ -14,12 +14,17 @@
           </MiddlewareOptions>
 	  </PipeLoader>
 	</Loader>
+	
+  	<Loader id="guiembodiment" loader="asap.realizerembodiments.JFrameEmbodiment">
+        <BmlUI demoscriptresources="Snoozle/testbml"/>
+        <FeedbackUI/>
+    </Loader>
 
-    <Loader id="middlewareembodiment" loader="asap.middlewareengine.embodiment.MiddlewareEmbodiment" requiredloaders="">
+    <Loader id="middlewareembodiment" loader="asap.middlewareengine.embodiment.MiddlewareEmbodiment" requiredloaders="guiembodiment">
         <MiddlewareOptions loaderclass="nl.utwente.hmi.middleware.stomp.STOMPMiddlewareLoader">
             <MiddlewareProperty name="default" value="true"/>
             <MiddlewareProperty name="iTopic" value="/topic/dummyin"/>
-            <MiddlewareProperty name="oTopic" value="/topic/SnoozleCommands"/>
+            <MiddlewareProperty name="oTopic" value="/topic/snoozleCommands"/>
         </MiddlewareOptions>
     </Loader>
       

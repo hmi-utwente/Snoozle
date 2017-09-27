@@ -48,7 +48,6 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 
 	private static Logger logger = LoggerFactory.getLogger(SnoozleToMiddleware.class.getName());
 
-	private JsonNode previousData = null;
 	private Middleware mw;
 
 	/**
@@ -115,6 +114,7 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 			JsonNode jn = mapper.readTree(data);
 			logger.debug("Transformed data to json object: {}", jn.toString());
 			
+			mw.sendData(jn);
 		} catch (JsonProcessingException e) {
 			logger.warn("Error while parsing data from SNOOZLE as JSON \"{}\": {}", data, e.getMessage());
 			// TODO Auto-generated catch block
@@ -133,6 +133,8 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 	 */
 	@Override
 	public void receiveData(JsonNode jn) {
+		logger.debug("Got new motor command: {}", jn.toString());
+		
 		ArrayList<Integer> servos = new ArrayList<Integer>();
 		int position = 10;
 		int stepDelay = 10;
@@ -180,6 +182,8 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 	    	bs[4] = (byte) position;
 	    	bs[5] = (byte) stepDelay;
 	    	bs[6] = (byte) stepSize;
+	    	
+	    	logger.debug("Sending bytes to arduino: {}", bs);
 	    	
     		sendBytes(bs);
 		}
