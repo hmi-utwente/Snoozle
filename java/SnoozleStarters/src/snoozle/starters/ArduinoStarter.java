@@ -63,30 +63,14 @@ public class ArduinoStarter {
         
 		//TODO: make this configurable (through commandline..?)
 		Properties ps = new Properties();
-		ps.put("iTopic", "/topic/dummyin");
-		ps.put("oTopic", "/topic/rampSensors");
+		ps.put("iTopic", "/topic/snoozleCommands");
+		ps.put("oTopic", "/topic/snoozleSensors");
 		
         GenericMiddlewareLoader gml = new GenericMiddlewareLoader("nl.utwente.hmi.middleware.stomp.STOMPMiddlewareLoader", ps);
         Middleware mw = gml.load();
 
-        //create the serial connection and start sending data :-)
+        //create the serial connection and start receiving/sending data :-)
         SnoozleToMiddleware usbListener = new SnoozleToMiddleware(comPorts, mw);
-        while(true){
-        	byte[] bs = new byte[16];
-        	bs[0] = 0;
-        	bs[1] = 0;
-        	bs[2] = 0;
-        	bs[3] = 1;
-        	bs[4] = (byte) 180;
-        	bs[5] = 4;
-        	usbListener.sendBytes(bs);
-        try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        }
 
 	}
 

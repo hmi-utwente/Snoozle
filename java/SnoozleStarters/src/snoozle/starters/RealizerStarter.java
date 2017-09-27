@@ -19,10 +19,10 @@ import asap.bml.ext.bmlt.BMLTInfo;
 import asap.environment.AsapEnvironment;
 import asap.environment.AsapVirtualHuman;
 
-public class SnoozleRealizerStarter
+public class RealizerStarter
 {
 	
-    public SnoozleRealizerStarter(String spec) throws IOException
+    public RealizerStarter(String spec) throws IOException
     {
         Console.setEnabled(false);
         BMLTInfo.init();
@@ -72,6 +72,6 @@ public class SnoozleRealizerStarter
         }
     	
 		GenericMiddlewareLoader.setGlobalPropertiesFile(propFile);
-        SnoozleRealizerStarter demo = new SnoozleRealizerStarter(spec);
+        RealizerStarter demo = new RealizerStarter(spec);
     }
 }
