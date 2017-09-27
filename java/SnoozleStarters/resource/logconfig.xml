@@ -13,6 +13,7 @@
   </root>
   
   <logger name="snoozle" level="DEBUG"/>
+  <logger name="hmi.flipper2" level="DEBUG"/>
   <logger name="nl.utwente" level="INFO"/>
   <logger name="asap.realizer" level="INFO"/>
   <logger name="nl.utwente.hmi.usb" level="DEBUG"/>
