@@ -1,0 +1,104 @@
+<behaviourtemplates>
+
+	<is name="sensorData">
+	{	
+		"THRESHOLD" : {
+		"HAND_DETECT" : 30
+		},
+		"rawSensorData": {
+		"Hand" : 100,
+		"Pillar_1" : 100,
+		"Pillar_2" : 100
+		},
+		"processedSensorData" : {
+		"isHandIn" : false,
+		"isApproach" : false,
+		"isRetreat" : false,
+		"isPresent" : false
+		},
+		"isInitialised" : false
+	}
+	</is>
+	
+	<javascript><![CDATA[
+      function isHandPresent() {
+      	return is.sensorData.rawSensorData.Hand < is.sensorData.THRESHOLD.HAND_DETECT;
+      }
+      
+      ]]></javascript>
+      
+      <template id="INIT" name="INIT">
+      	<preconditions mode="and">
+      		<condition>is.sensorData.isInitialised === false</condition>
+      	</preconditions>
+      	<effects>
+      		<method name="isConnected">
+				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware">
+					<constructors>
+						<value class="String" constant="SnoozleSensors.properties" />
+					</constructors>
+				</object>
+				<arguments></arguments>
+			</method>
+      		<method name="isConnected">
+				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware">
+					<constructors>
+						<value class="String" constant="AsapBMLPipe.properties" />
+					</constructors>
+				</object>
+				<arguments></arguments>
+			</method>
+      		<assign is="is.sensorData.isInitialised">true</assign>
+      	</effects>
+      </template>
+      
+	<template id="Retrieve_Data" name="Retrieve_Data">
+		<preconditions mode="and">
+      		<condition>is.sensorData.isInitialised === true</condition>
+			<method name="isConnected">
+				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware"></object>
+				<arguments></arguments>
+			</method>
+			<method name="hasMessage">
+				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware"></object>
+				<arguments></arguments>
+			</method>
+		</preconditions>
+		<effects>
+			<method is="is.sensorData.rawSensorData" is_type="JSONString"
+				name="getMessage">
+				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware"></object>
+				<arguments></arguments>
+			</method>
+		</effects>
+		
+	</template>
+
+
+	<template id="Detect_Hand" name="Detect_Hand">
+		<preconditions mode="and">
+			<condition>is.sensorData.processedSensorData.isHandIn === false</condition>
+			<condition><![CDATA[
+	      		isHandPresent()
+	      	]]></condition>
+		</preconditions>
+		<effects>
+      		<assign is="is.sensorData.processedSensorData.isHandIn">true</assign> 
+		</effects>
+	</template>
+	
+	<template id="Detect_No_Hand" name="Detect_No_Hand">
+		<preconditions mode="and">
+			<condition>is.sensorData.processedSensorData.isHandIn === true</condition>
+			<condition><![CDATA[
+	      		!isHandPresent()
+	      	]]></condition>
+		</preconditions>
+		<effects>
+      		<assign is="is.sensorData.processedSensorData.isHandIn">false</assign> 
+		</effects>
+	</template>
+
+	
+
+</behaviourtemplates>
