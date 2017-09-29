@@ -142,7 +142,7 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 		
 		//first, parse the servo(s)
 		//the servo field might be an array, or it might be just 1 int
-		if(jn.get("servo").isArray()){
+		if(jn.get("servo") != null && jn.get("servo").isArray()){
 			for(JsonNode s : jn.get("servo")){
 				if(s.isInt()){
 					servos.add(s.asInt());
@@ -150,7 +150,7 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 					logger.warn("Got a malformed servo request: {} (Full JSON: {})", s.toString(), jn.toString());
 				}
 			}
-		} else if(jn.get("servo").isInt()){
+		} else if(jn.get("servo") != null && jn.get("servo").isInt()){
 			servos.add(jn.get("servo").asInt());
 		} else {
 			logger.info("No servo field found, defaulting to all servos");

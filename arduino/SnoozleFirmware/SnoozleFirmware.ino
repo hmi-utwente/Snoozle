@@ -35,7 +35,7 @@ bool flipServo[] = { true, true, false, false};
 
 // what digital pins are we connected to
 int servoPins[] =          {  5, 6, 10, 11 };
-int servoTargetVals[] =    {  179,  179,  1, 1 };
+int servoTargetVals[] =    {  175,  175,  5, 5 };
 int servoVals[] =          {  1,  1,  1, 1 };
 int servoStepDelays[] =    {  0,  0,  0, 0 };
 int servoStepSizes[] =     {  1,  1,  1, 1 };
@@ -82,13 +82,13 @@ void loop() {
       int _spd = buf[2];  // interpolate to that position from the current position, but wait &_spd ms between each step
       int _stp = buf[3]; // step size
 
-      /* Debug */
+      /* Debug
       Serial.println();
       Serial.print("Servo: "); Serial.print(_servo);
       Serial.print(" Val: "); Serial.print(_val);
       Serial.print(" Spd: "); Serial.print(_spd);
       Serial.println();
-      /**/
+      */
       if (_servo <= nServos && _servo > 0) {
         if (flipServo[_servo-1]) _val = 181-_val;
         _val = constrain(_val, 1, 179);
