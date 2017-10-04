@@ -2,59 +2,89 @@
 
 	<is name="sensorData">
 	{	
-		"THRESHOLD" : {
-		"HAND_DETECT" : 30
+		"CONSTANTS" : {
+			"FLOAT_SENSITIVITY" : 4 
 		},
-		"rawSensorData": {
-		"Hand" : 100,
-		"Pillar_1" : 100,
-		"Pillar_2" : 100
+		"THRESHOLDS" : {
+			"HAND_DETECT" : 30,
+			"PERSON_PRESENT" : 175,
+			"SPEED" : 10 
 		},
-		"processedSensorData" : {
-		"isHandIn" : false,
-		"isApproach" : false,
-		"isRetreat" : false,
-		"isPresent" : false
+		"raw": {
+			"Hand" : 100,
+			"Pillar_1" : 100,
+			"Pillar_2" : 100
 		},
-		"isInitialised" : false
+		"processed" : {
+			"isHandIn" : false,
+			"wasPresent" : false,
+			"wasApproaching" : false,
+			"wasRetreating" : false,
+			"personDetector" : "NONE",
+			"floatingAverageMinDist" : 175
+		}
 	}
 	</is>
 	
 	<javascript><![CDATA[
       function isHandPresent() {
-      	return is.sensorData.rawSensorData.Hand < is.sensorData.THRESHOLD.HAND_DETECT;
+      	return is.sensorData.raw.Hand < is.sensorData.THRESHOLDS.HAND_DETECT;
       }
       
-      ]]></javascript>
+      function isUserPresent() {
+      	var isPresent = is.sensorData.processed.floatingAverageMinDist < is.sensorData.THRESHOLDS.PERSON_PRESENT;
+      	if(isPresent && is.sensorData.processed.wasPresent){
+      		return true;
+      	} else {
+      		is.sensorData.processed.wasPresent = isPresent;
+      		return false;
+      	}
+      }
       
-      <template id="INIT" name="INIT">
-      	<preconditions mode="and">
-      		<condition>is.sensorData.isInitialised === false</condition>
-      	</preconditions>
-      	<effects>
-      		<method name="isConnected">
-				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware">
-					<constructors>
-						<value class="String" constant="SnoozleSensors.properties" />
-					</constructors>
-				</object>
-				<arguments></arguments>
-			</method>
-      		<method name="isConnected">
-				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware">
-					<constructors>
-						<value class="String" constant="AsapBMLPipe.properties" />
-					</constructors>
-				</object>
-				<arguments></arguments>
-			</method>
-      		<assign is="is.sensorData.isInitialised">true</assign>
-      	</effects>
-      </template>
+      function updateFloatingAverageMinDist(currVal, newVal){
+      	return (currVal + newVal * is.sensorData.CONSTANTS.FLOAT_SENSITIVITY) / (is.sensorData.CONSTANTS.FLOAT_SENSITIVITY + 1);
+      }
+      
+      function isUserApproaching() {
+      	var isApproaching = isUserPresent() && Math.min(is.sensorData.raw.Pillar_1, is.sensorData.raw.Pillar_2) - is.sensorData.processed.floatingAverageMinDist < (-1 * (is.sensorData.THRESHOLDS.SPEED / is.sensorData.CONSTANTS.FLOAT_SENSITIVITY));
+      	if (isApproaching && is.sensorData.processed.wasApproaching){
+      		return true;
+      	} else {
+      		is.sensorData.processed.wasApproaching = isApproaching;
+      		return false;
+      	}	
+      	
+      }
+      
+      function isUserRetreating() {
+		var isRetreating = isUserPresent() && Math.min(is.sensorData.raw.Pillar_1, is.sensorData.raw.Pillar_2) - is.sensorData.processed.floatingAverageMinDist > ((is.sensorData.THRESHOLDS.SPEED / is.sensorData.CONSTANTS.FLOAT_SENSITIVITY));
+      	if (isRetreating && is.sensorData.processed.wasRetreating){
+      		return true;
+      	} else {
+      		is.sensorData.processed.wasRetreating = isRetreating;
+      		return false;
+      	}	
+      }
+      
+      function detectPersonState(){
+      	if(!isUserPresent()){
+      		return "NONE";
+      	} else if(isUserApproaching()){
+      		return "APPROACH";
+      	} else if(isUserRetreating()){
+      		return "RETREAT";
+      	} else {
+      		if(is.sensorData.processed.personDetector === "NONE"){
+      			return "PRESENT";
+      		} else {
+      			return is.sensorData.processed.personDetector;
+      		}
+      	}
+      }
+      ]]></javascript>
       
 	<template id="Retrieve_Data" name="Retrieve_Data">
 		<preconditions mode="and">
-      		<condition>is.sensorData.isInitialised === true</condition>
 			<method name="isConnected">
 				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware"></object>
 				<arguments></arguments>
@@ -65,11 +95,17 @@
 			</method>
 		</preconditions>
 		<effects>
-			<method is="is.sensorData.rawSensorData" is_type="JSONString"
-				name="getMessage">
+			<method is="is.sensorData.raw" is_type="JSONString" name="getMessage">
 				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware"></object>
 				<arguments></arguments>
 			</method>
+			<assign is="is.sensorData.processed.floatingAverageMinDist"><![CDATA[
+			updateFloatingAverageMinDist(is.sensorData.processed.floatingAverageMinDist, Math.min(is.sensorData.raw.Pillar_1, is.sensorData.raw.Pillar_2))
+			]]></assign>
+			
+			<assign is="is.sensorData.processed.personDetector"><![CDATA[
+			detectPersonState()
+			]]></assign>
 		</effects>
 		
 	</template>
@@ -77,28 +113,29 @@
 
 	<template id="Detect_Hand" name="Detect_Hand">
 		<preconditions mode="and">
-			<condition>is.sensorData.processedSensorData.isHandIn === false</condition>
+			<condition>is.sensorData.processed.isHandIn === false</condition>
 			<condition><![CDATA[
 	      		isHandPresent()
 	      	]]></condition>
 		</preconditions>
 		<effects>
-      		<assign is="is.sensorData.processedSensorData.isHandIn">true</assign> 
+      		<assign is="is.sensorData.processed.isHandIn">true</assign> 
 		</effects>
 	</template>
 	
 	<template id="Detect_No_Hand" name="Detect_No_Hand">
 		<preconditions mode="and">
-			<condition>is.sensorData.processedSensorData.isHandIn === true</condition>
+			<condition>is.sensorData.processed.isHandIn === true</condition>
 			<condition><![CDATA[
 	      		!isHandPresent()
 	      	]]></condition>
 		</preconditions>
 		<effects>
-      		<assign is="is.sensorData.processedSensorData.isHandIn">false</assign> 
+      		<assign is="is.sensorData.processed.isHandIn">false</assign> 
 		</effects>
 	</template>
-
+	
+	
 	
 
 </behaviourtemplates>

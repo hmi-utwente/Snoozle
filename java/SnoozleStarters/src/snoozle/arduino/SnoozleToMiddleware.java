@@ -158,13 +158,13 @@ public class SnoozleToMiddleware extends USBWrapper implements MiddlewareListene
 		}
 		
 		//then, parse the rest of the fields
-		if(jn.get("position").isInt()){
+		if(jn.get("position") != null && jn.get("position").isInt()){
 			position = jn.get("position").asInt();
 		}
-		if(jn.get("stepDelay").isInt()){
+		if(jn.get("stepDelay") != null && jn.get("stepDelay").isInt()){
 			stepDelay = jn.get("stepDelay").asInt();
 		}
-		if(jn.get("stepSize").isInt()){
+		if(jn.get("stepSize") != null && jn.get("stepSize").isInt()){
 			stepSize = jn.get("stepSize").asInt();
 		}
 		

@@ -146,6 +146,11 @@ long readDistance(int trigPin, int echoPin) {
   digitalWrite(trigPin, LOW);  // Added this line
   long duration = pulseIn(echoPin, HIGH, 12000);
   long distance = (duration / 2) / 29.1;
+
+  if(distance <= 0){
+    distance = 200;
+  }
+  
   return distance;
 }
 

@@ -1,0 +1,35 @@
+<behaviourtemplates>
+	<is name="init">
+		{
+			"initialised" : false
+		}
+	</is>
+	
+      <template id="INIT" name="INIT">
+      	<preconditions>
+      		<condition>is.init.initialised === false</condition>
+      	</preconditions>
+      	<initeffects>
+      		<method name="isConnected">
+				<object persistent="snoozle.sensors" class="flipper.FlipperMiddleware">
+					<constructors>
+						<value class="String" constant="SnoozleSensors.properties" />
+					</constructors>
+				</object>
+				<arguments></arguments>
+			</method>
+      		<method name="isConnected">
+				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware">
+					<constructors>
+						<value class="String" constant="AsapBMLPipe.properties" />
+					</constructors>
+				</object>
+				<arguments></arguments>
+			</method>
+      	</initeffects>
+      	<effects>
+      		<assign is="is.init.initialised">true</assign>
+      	</effects>
+      </template>
+      
+</behaviourtemplates>

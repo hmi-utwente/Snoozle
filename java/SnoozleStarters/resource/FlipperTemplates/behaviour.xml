@@ -2,31 +2,33 @@
 
 	<is name="behaviour">
 		{
-		"CONSTANT" : {
-		"SLEEP_DURATION" : 60000,
-		"HAPPY_DURATION" : 10000
+		"CONSTANTS" : {
+			"ASLEEP_DURATION" : 60000,
+			"SLEEPING_DURATION" : 40000,
+			"RECOGNISE_DURATION" : 10000,
+			"INVITE_DURATION" : 40000,
+			"SAD_DURATION" : 2000,
+			"EXCITED_DURATION" : 7000,
+			"QUESTION_DURATION" : 10000
 		},
 		"state" : "AWAKE", <!-- could be: AWAKE or ASLEEP -->
-		"currentAction" : "IDLE", <!-- could also be: IDLE, INVITE, SAD, HAPPY, SLEEPING, QUESTION -->
+		"currentAction" : "IDLE", <!-- could also be: IDLE, INVITE, SAD, EXCITED, SLEEPING, QUESTION -->
 		"timeAsleep" : 0
 		}
 	</is>
 	
-	
 	<template id="Hand_In_Awake" name="Hand_In_Awake">
 		<preconditions mode="and">
-      		<condition>is.sensorData.isInitialised === true</condition>
 			<condition>is.behaviour.state === "AWAKE"</condition>
-			<condition>is.behaviour.currentAction !== "HAPPY"</condition>
-			<condition>is.behaviour.currentAction !== "SLEEPING"</condition>
-			<condition>is.sensorData.processedSensorData.isHandIn === true</condition>
+			<condition>is.behaviour.currentAction === "INVITE" || is.behaviour.currentAction === "QUESTION" || is.behaviour.currentAction === "IDLE" || is.behaviour.currentAction === "SAD"</condition>
+			<condition>is.sensorData.processed.isHandIn === true</condition>
 		</preconditions>
 		<effects>
       		<method name="send">
 				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware"></object>
 				<arguments>
 					<value class="String"><![CDATA[
-						<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1">
+						<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1" composition="REPLACE">
 							<bmlt:audiofile start="0" id="audio0" fileName="Snoozle/audio/Excited/Snoozified-Excited.wav" />
 
 							<mw:sendJsonMessage start="0.6" id="serv0">{
@@ -81,13 +83,209 @@
 			  		  ]]></value>
 				</arguments>
 			</method>
-      		<assign is="is.behaviour.currentAction">"HAPPY"</assign> 
-      		<assign is="is.behaviour.timeToIdle">Date.now() + is.behaviour.CONSTANT.HAPPY_DURATION</assign> 
+      		<assign is="is.behaviour.currentAction">"EXCITED"</assign> 
+      		<assign is="is.behaviour.timeToSleeping">Date.now() + is.behaviour.CONSTANTS.EXCITED_DURATION</assign> 
 		</effects>
 	</template>
 	
-	<template id="Reset_To_Idle" name="Reset_To_Idle">
+	<template id="Hand_Out_Question" name="Hand_Out_Question">
 		<preconditions mode="and">
+			<condition>is.behaviour.state === "AWAKE"</condition>
+			<condition>is.behaviour.currentAction === "EXCITED" || is.behaviour.currentAction === "SLEEPING"</condition>
+			<condition>is.sensorData.processed.isHandIn === false</condition>
+		</preconditions>
+		<effects>
+      		<method name="send">
+				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware"></object>
+				<arguments>
+					<value class="String"><![CDATA[
+						<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1" composition="REPLACE">
+							<bmlt:audiofile start="0" id="audio0" fileName="Snoozle/audio/Snooze/WeeeehLouder.wav" />
+							<mw:sendJsonMessage start="0" id="serv0">{
+							  "msgType": "setServo",
+							  "servo": [1,2,3,4],
+							  "position": 20,
+							  "stepDelay": 5,
+								"stepDelay": 5,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+						</bml>
+			  		  ]]></value>
+				</arguments>
+			</method>
+      		<assign is="is.behaviour.currentAction">"QUESTION"</assign> 
+      		<assign is="is.behaviour.timeToIdle">Date.now() + is.behaviour.CONSTANTS.QUESTION_DURATION</assign> 
+		</effects>
+	</template>
+	
+	
+	<template id="Approach_Awake" name="Approach_Awake">
+		<preconditions mode="and">
+			<condition>is.behaviour.state === "AWAKE"</condition>
+			<condition>is.behaviour.currentAction === "IDLE"</condition>
+			<condition>is.sensorData.processed.personDetector === "APPROACH" || is.sensorData.processed.personDetector === "PRESENT"</condition>
+		</preconditions>
+		<effects>
+      		<method name="send">
+				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware"></object>
+				<arguments>
+					<value class="String"><![CDATA[
+						<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1" composition="REPLACE">
+							<bmlt:audiofile id="audio0" fileName="Snoozle/audio/Invite/Cute_Snooring_01.wav" start="0"/>
+
+							<mw:sendJsonMessage id="serv0" start="0.3">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv1" start="2.0">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage id="serv2" start="4.4">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv3" start="6.1">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage id="serv4" start="9.5">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv5" start="12.0">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage id="serv6" start="15.3">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv7" start="17.1">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage id="serv8" start="21.2">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv9" start="22.9">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage id="serv10" start="26.9">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv11" start="28.4">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage id="serv12" start="32.0">{
+							"msgType": "setServo",
+							"position": 110,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv12a" start="32.7">{
+							"msgType": "setServo",
+							"position": 160,
+							"stepDelay": 5,
+							"stepSize": 10
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage id="serv13" start="33.5">{
+							"msgType": "setServo",
+							"position": 0,
+							"stepDelay": 25,
+							"stepSize": 1
+							}</mw:sendJsonMessage>
+
+						</bml>
+			  		  ]]></value>
+				</arguments>
+			</method>
+      		<assign is="is.behaviour.currentAction">"INVITE"</assign> 
+      		<assign is="is.behaviour.timeToIdle">Date.now() + is.behaviour.CONSTANTS.INVITE_DURATION</assign> 
+		</effects>
+	</template>
+	
+	<template id="Retreat_Awake" name="Retreat_Awake">
+		<preconditions mode="and">
+			<condition>is.behaviour.state === "AWAKE"</condition>
+			<condition>is.behaviour.currentAction === "INVITE"</condition>
+			<condition>is.sensorData.processed.personDetector === "RETREAT" || is.sensorData.processed.personDetector === "NONE"</condition>
+		</preconditions>
+		<effects>
+      		<method name="send">
+				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware"></object>
+				<arguments>
+					<value class="String"><![CDATA[
+						<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1" composition="REPLACE">
+							<bmlt:audiofile start="0" id="audio0" fileName="Snoozle/audio/Snooze/WeeeehLouder.wav" />
+							<mw:sendJsonMessage start="0" id="serv0">{
+							  "msgType": "setServo",
+							  "servo": [1,2,3,4],
+							  "position": 20,
+							  "stepDelay": 5,
+								"stepDelay": 5,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+						</bml>
+			  		  ]]></value>
+				</arguments>
+			</method>
+      		<assign is="is.behaviour.currentAction">"SAD"</assign> 
+      		<assign is="is.behaviour.timeToIdle">Date.now() + is.behaviour.CONSTANTS.SAD_DURATION</assign> 
+		</effects>
+	</template>
+	
+	<template id="Reset_To_Idle_Timer" name="Reset_To_Idle_Timer">
+		<preconditions mode="and">
+			<condition>is.behaviour.currentAction === "INVITE" || is.behaviour.currentAction === "SAD" || is.behaviour.currentAction === "QUESTION"</condition>
 			<condition>Date.now() &gt; is.behaviour.timeToIdle</condition>
 		</preconditions>
 		
@@ -95,5 +293,336 @@
 			<assign is="is.behaviour.currentAction">"IDLE"</assign>
 		</effects>
 	</template>
+	
+	
+	<template id="Going_To_Sleeping" name="Going_To_Sleeping">
+		<preconditions mode="and">
+			<condition>is.behaviour.state !== "ASLEEP"</condition>
+			<condition>is.behaviour.currentAction === "EXCITED"</condition>
+			<condition>Date.now() &gt; is.behaviour.timeToSleeping</condition>
+		</preconditions>
+		
+		<effects>
+      		<method name="send">
+				<object persistent="asap.bmlPipe" class="flipper.FlipperBmlPipeMiddleware"></object>
+				<arguments>
+					<value class="String"><![CDATA[
+						<bml xmlns="http://www.bml-initiative.org/bml/bml-1.0" id="bml1" xmlns:bmlt="http://hmi.ewi.utwente.nl/bmlt" xmlns:mw="http://hmi.ewi.utwente.nl/middlewareengine" id="bml1" composition="REPLACE">
+							<bmlt:audiofile start="0" id="audio0" fileName="Snoozle/audio/SleepSupport/OpenMouth1MinuteSnore.wav" />
+
+							<mw:sendJsonMessage start="3.1" id="serv0">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="4.6" id="serv0e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="6.6" id="serv1">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="8.1" id="serv1e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="10.1" id="serv2">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="11.6" id="serv2e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="13.7" id="serv3">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="15.2" id="serv3e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="17.3" id="serv4">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="18.8" id="serv4e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="20.5" id="serv5">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="22.0" id="serv5e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="23.7" id="serv6">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="25.2" id="serv6e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="26.8" id="serv7">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 160,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="28.3" id="serv7e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="30.0" id="serv8">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 140,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="31.5" id="serv8e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="33.2" id="serv9">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 120,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="34.7" id="serv9e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="36.6" id="serv10">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 100,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="38.1" id="serv10e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="40.2" id="serv11">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 80,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="41.7" id="serv11e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="43.9" id="serv12">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 60,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="45.4" id="serv12e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="47.6" id="serv13">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 40,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="49.1" id="serv13e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="50.9" id="serv14">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 20,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="52.4" id="serv14e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							
+							<mw:sendJsonMessage start="54.5" id="serv15">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 20,
+							  "stepDelay": 20,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							
+							<mw:sendJsonMessage start="56.0" id="serv15e">{
+							  "msgType": "setServo",
+							  "servo": [2,4],
+							  "position": 0,
+							  "stepDelay": 25,
+							  "stepSize": 1
+							}</mw:sendJsonMessage>
+							<mw:sendJsonMessage id="serv0" start="0">{
+							"msgType": "setServo",
+							"servo": 1,
+							  "stepDelay": 1,
+							"position": 20
+							}</mw:sendJsonMessage>
+						
+						</bml>
+			  		  ]]></value>
+				</arguments>
+			</method>
+			<assign is="is.behaviour.currentAction">"SLEEPING"</assign>
+			<assign is="is.behaviour.timeToAsleep">Date.now() + is.behaviour.CONSTANTS.SLEEPING_DURATION</assign>
+		</effects>
+	</template>
+	
+	
+	
+	<template id="Going_To_Asleep" name="Going_To_Asleep">
+		<preconditions mode="and">
+			<condition>is.behaviour.state !== "ASLEEP"</condition>
+			<condition>is.behaviour.currentAction === "SLEEPING"</condition>
+			<condition>Date.now() &gt; is.behaviour.timeToAsleep</condition>
+		</preconditions>
+		
+		<effects>
+			<assign is="is.behaviour.state">"ASLEEP"</assign>
+			<assign is="is.behaviour.timeToWake">Date.now() + is.behaviour.CONSTANTS.ASLEEP_DURATION</assign>
+		</effects>
+	</template>
+	
+	
+	<template id="Going_To_Wake" name="Going_To_Wake">
+		<preconditions mode="and">
+			<condition>is.behaviour.state === "ASLEEP"</condition>
+			<condition>Date.now() &gt; is.behaviour.timeToWake</condition>
+		</preconditions>
+		
+		<effects>
+			<assign is="is.behaviour.state">"AWAKE"</assign>
+			<assign is="is.behaviour.currentAction">"IDLE"</assign>
+		</effects>
+	</template>
+	
 	
 </behaviourtemplates>
