@@ -34,7 +34,7 @@ public class ArduinoStarter {
     	String help = "Expecting commandline arguments in the form of \"-<argname> <arg>\".\nAccepting the following argnames: middlewareprops, comport";
     	
     	String mwPropFile = "defaultmiddleware.properties";
-    	String[] comPorts = new String[] {"COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9","COM10","/dev/tty.usbmodem1421"};
+    	String[] comPorts = new String[] {"COM5","/dev/tty.usbmodem1421"};
 
         if(args.length % 2 != 0){
         	System.err.println(help);
