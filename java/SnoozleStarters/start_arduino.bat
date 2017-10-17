@@ -1,0 +1,1 @@
+ant run -Drun.main.class=snoozle.starters.ArduinoStarter
