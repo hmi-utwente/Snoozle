@@ -124,7 +124,9 @@ void loop() {
     long distance1, distance2, distance3;
   
     distance1 = readDistance(trigPin1, echoPin1);
+    delay(10);
     distance2 = readDistance(trigPin2, echoPin2);
+    delay(10);
     distance3 = readDistance(trigPin3, echoPin3);
 
     Serial.print("{ \"Hand\" : ");
