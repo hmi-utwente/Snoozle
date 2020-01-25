@@ -62,7 +62,7 @@ XBeeSerialHandler.prototype.Connect = function () {
     return new Promise(function(fullfill, reject) {
         self.Close().then(function(res) {
             self.serialport = new SerialPort(serialPortName, {
-              baudrate: baudrate,
+              baudRate: baudrate,
               parser: self.xbeeAPI.rawParser()
             });
 
